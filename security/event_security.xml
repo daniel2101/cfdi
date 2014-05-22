@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<openerp>
+  <data>
+    <record id="cfdi_admin" model="res.groups">
+        <field name="name">CFDI / Admin</field>
+    </record>
+    <record id="cfdi_read" model="res.groups">
+        <field name="name">CFDI / Contabilidad</field>
+    </record>
+  </data>
+</openerp>
+

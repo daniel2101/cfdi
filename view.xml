@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        
+        <menuitem name="CFDI_rNet" id="menu_cfdi" icon="terp-personal"
+            web_icon="images/cfdi.png"
+            web_icon_hover="images/cfdi-hover.png"/>
+            
+        <!-- VISTA DE ARBOL PARA LA CONFIGURACIÓN DE CFDI -->
+        <record model="ir.ui.view" id="view_cfdi_rnet_tree">
+            <field name="name">view.cfdi.rnet.tree</field>
+            <field name="model">cfdi.rnet</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Lista de CFDIs Configurados">
+                    <field name="name"/>
+                    <field name="numero_serie"/>
+                    <field name="fecha_inicio"/>
+                    <field name="fecha_fin"/>
+                </tree>
+            </field>
+        </record>
+        
+        <!-- VISTA DE FORMULARIO PARA LA CONFIGURACIÓN DE CFDI -->
+        <record model="ir.ui.view" id="view_cfdi_rnet_form">
+            <field name="name">view.cfdi.rnet.form</field>
+            <field name="model">cfdi.rnet</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="CFDI">
+                    <field name="name" colspan="2"/>
+                    <notebook colspan="4">
+                        <page string="CFDI">
+                            <group col="4" colspan="4">
+                                <separator string="Certificado" colspan="4"/>
+                                <group col="4" colspan="2">
+                                    <label string="" colspan="2"/>
+                                </group>
+                                <group col="4" colspan="2">
+                                    <separator string="Cedula de Identificación Fiscal" colspan="4"/>
+                                    <label string="" colspan="1"/>
+                                    <field name="rfc" widget="image" nolabel="1" colspan="2"/>
+                                    <label string="" colspan="1"/>
+                                </group>
+                            </group>
+                            <group col="4" colspan="4">
+                                <field name="certificado" colspan="4"/>
+                                <field name="certificado_key" colspan="4"/>
+                                <field name="certificado_password" password="True"/>
+                                <label string="" colspan="2"/>
+                                <newline/>
+                                <separator string="Datos del Certificado" colspan="4"/>
+                                <field name="certificado_pem" colspan="4" readonly="1"/>
+                                <field name="certificado_key_pem" colspan="4" readonly="1"/>
+                                <field name="numero_serie" colspan="4" readonly="1"/>
+                                <field name="fecha_inicio"/>
+                                <field name="fecha_fin" readonly="1"/>
+                                <newline/>
+                                <label string="" colspan="2"/><label string="" colspan="2"/>
+                                <button name="get_certificate_info" string="Obtener datos del Certificado" type="object" icon="gtk-execute" colspan="1"/><label string="" colspan="3"/>
+                                <newline/>
+                            </group>
+                            <group col="4" colspan="4">
+                                <separator string="Datos del PAC" colspan="4"/>
+                                <field name="pac_usuario"/>
+                                <field name="pac_password"/>
+                                <field name="pac_api_key"/>
+                                <field name="wsdl" widget="url"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </form>
+            </field>
+        </record>
+        
+        <!-- ACCIONES PARA LA CONFIGURACIÓN DE CFDI -->
+        <record id="action_cfdi_rnet" model="ir.actions.act_window">
+            <field name="name">Configuración CFDI</field>
+            <field name="res_model">cfdi.rnet</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        
+        <!-- VISTA DE ARBOL FORMA DE PAGO-->
+        <record model="ir.ui.view" id="cfdi_forma_pago_tree">
+            <field name="name">cfdi.forma.pago.tree</field>
+            <field name="model">cfdi.forma.pago</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Forma de Pago">
+                    <field name="name"/>
+                    <field name="descripcion"/>
+                </tree>
+            </field>
+        </record>
+        
+        <!-- VISTA DE FORMULARIO FORMA DE PAGO-->        
+        <record model="ir.ui.view" id="cfdi_forma_pago_form">
+            <field name="name">cfdi.forma.pago.form</field>
+            <field name="model">cfdi.forma.pago</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Forma de Pago">
+                    <field name="name" colspan="4"/>
+                    <field name="descripcion" colspan="4"/>
+                </form>
+            </field>
+        </record>
+        
+        <!-- ACCIONES PARA FORMA DE PAGO -->
+        <record id="action_cfdi_forma_pago" model="ir.actions.act_window">
+            <field name="name">Formas de Pago</field>
+            <field name="res_model">cfdi.forma.pago</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        
+        <!-- VISTA DE ARBOL METODO DE PAGO-->
+        <record model="ir.ui.view" id="cfdi_metodo_pago_tree">
+            <field name="name">cfdi.forma.metodo.tree</field>
+            <field name="model">cfdi.metodo.pago</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Metodo de Pago">
+                    <field name="name"/>
+                    <field name="descripcion"/>
+                </tree>
+            </field>
+        </record>
+        
+        <!-- VISTA DE FORMULARIO METODO DE PAGO-->        
+        <record model="ir.ui.view" id="cfdi_metodo_pago_form">
+            <field name="name">cfdi.metodo.pago.form</field>
+            <field name="model">cfdi.metodo.pago</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Metodo de Pago">
+                    <field name="name" colspan="4"/>
+                    <field name="descripcion" colspan="4"/>
+                </form>
+            </field>
+        </record>
+        
+        <!-- ACCIONES PARA METODO DE PAGO -->
+        <record id="action_cfdi_metodo_pago" model="ir.actions.act_window">
+            <field name="name">Metodo de Pago</field>
+            <field name="res_model">cfdi.metodo.pago</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        
+         <!-- VISTA DE ARBOL TIPO DE COMPROBANTE-->
+        <record model="ir.ui.view" id="cfdi_tipo_comprobante_tree">
+            <field name="name">cfdi.tipo.comprobante.tree</field>
+            <field name="model">cfdi.tipo.comprobante</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Tipo de Comprobante">
+                    <field name="name"/>
+                    <field name="descripcion"/>
+                </tree>
+            </field>
+        </record>
+        
+        <!-- VISTA DE FORMULARIO TIPO DE COMPROBANTE-->        
+        <record model="ir.ui.view" id="cfdi_tipo_comprobante_form">
+            <field name="name">cfdi.tipo.comprobante.form</field>
+            <field name="model">cfdi.tipo.comprobante</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Tipo de Comprobante">
+                    <field name="name" colspan="4"/>
+                    <field name="descripcion" colspan="4"/>
+                </form>
+            </field>
+        </record>
+        
+        <!-- ACCIONES PARA TIPO DE COMPROBANTE -->
+        <record id="action_cfdi_tipo_comprobante" model="ir.actions.act_window">
+            <field name="name">Tipo de Comprobante</field>
+            <field name="res_model">cfdi.tipo.comprobante</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        
+        <!-- VISTA DE ARBOL REGIMEN FISCAL-->
+        <record model="ir.ui.view" id="cfdi_regimen_fiscal_tree">
+            <field name="name">cfdi.regimen.fiscal.tree</field>
+            <field name="model">cfdi.regimen.fiscal</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Regimen Fiscal">
+                    <field name="name"/>
+                    <field name="descripcion"/>
+                </tree>
+            </field>
+        </record>
+        
+        <!-- VISTA DE FORMULARIO REGIMEN FISCAL-->        
+        <record model="ir.ui.view" id="cfdi_regimen_fiscal_form">
+            <field name="name">cfdi.regimen.fiscal.form</field>
+            <field name="model">cfdi.regimen.fiscal</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Regimen Fiscal">
+                    <field name="name" colspan="4"/>
+                    <field name="descripcion" colspan="4"/>
+                </form>
+            </field>
+        </record>
+        
+        <!-- ACCIONES PARA REGIMEN FISCAL -->
+        <record id="action_cfdi_regimen_fiscal" model="ir.actions.act_window">
+            <field name="name">Regimen Fiscal</field>
+            <field name="res_model">cfdi.regimen.fiscal</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        
+        <!-- MENUS DE CFDI -->
+        <menuitem name="Configuración CDFI" id="menu_config_cfdi" parent="menu_cfdi"/>
+        <menuitem action="action_cfdi_rnet" id="menu_action_cfdi_rnet" parent="menu_config_cfdi"/>
+        <menuitem action="action_cfdi_forma_pago" id="menu_action_cfdi_forma_pago" parent="menu_config_cfdi"/>
+        <menuitem action="action_cfdi_metodo_pago" id="menu_action_cfdi_metodo_pago" parent="menu_config_cfdi"/>
+        <menuitem action="action_cfdi_tipo_comprobante" id="menu_action_cfdi_tipo_comprobante" parent="menu_config_cfdi"/>
+        <menuitem action="action_cfdi_regimen_fiscal" id="menu_action_cfdi_regimen_fiscal" parent="menu_config_cfdi"/>
+        
+        
+    </data>
+</openerp>	

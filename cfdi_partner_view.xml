@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+        
+        <record model="ir.ui.view" id="cfdi_partner_form">
+            <field name="name">cfdi.partner.form</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="account.view_partner_property_form"/>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <field name="property_payment_term" position="after">
+                    <field name="cfdi_forma_pago" widget="selection"/>
+                    <field name="cfdi_metodo_pago" widget="selection"/>
+                    <newline/>
+                </field>
+            </field>
+        </record>
+        
+    </data>
+</openerp>

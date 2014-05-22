@@ -1,0 +1,308 @@
+<?xml version="1.0"?>
+<document filename="Factura.pdf">
+  <template pageSize="(612.0,792.0)" title="Factura" author="Salvador Daniel Pelayo" allowSplitting="20">
+    <pageTemplate id="first">
+      <frame id="first" x1="57.0" y1="56.0" width="498" height="719"/>
+       <pageGraphics>
+            <setFont name="Helvetica" size="8.0"/>
+            <stroke color="#87429d"/>
+            <lineMode width="5"/>
+            <lines>2.0cm 2.15cm 19.5cm 2.15cm</lines>
+            <drawCentredString x="10.5cm" y="0.8cm">Página <pageNumber countingFrom="2"/></drawCentredString>
+        </pageGraphics>
+    </pageTemplate>
+  </template>
+  <stylesheet>
+    <blockTableStyle id="Standard_Outline">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+    </blockTableStyle>
+    <blockTableStyle id="Tabla1">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+    </blockTableStyle>
+    <blockTableStyle id="Tabla2">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle kind="LINEABOVE" colorName="#87429d" start="0,0" stop="-1,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#87429d" start="0,0" stop="-1,0"/>
+      <blockBackground colorName="#dddddd" start="0,0" stop="-1,0"/>
+    </blockTableStyle>
+    <blockTableStyle id="Tabla3">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle kind="LINEABOVE" colorName="#dddddd" start="0,0" stop="-1,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#dddddd" start="0,0" stop="-1,0"/>
+      <blockBackground colorName="#87429d" start="0,0" stop="-1,0"/>
+    </blockTableStyle>
+    <blockTableStyle id="Tabla4">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle kind="LINEABOVE" colorName="#87429d" start="0,0" stop="0,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#87429d" start="0,0" stop="0,0"/>
+      <blockBackground colorName="#DDDDDD" start="0,0" stop="0,0"/>
+    </blockTableStyle>
+    <initialize>
+      <paraStyle name="all" alignment="justify"/>
+    </initialize>
+    <paraStyle name="P1" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="12.0" leading="14" alignment="RIGHT" spaceBefore="0.0" spaceAfter="0.0" textColor="#FFFFFF"/>
+    <paraStyle name="invisible" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="1.0" leading="1" alignment="RIGHT" spaceBefore="0.0" spaceAfter="0.0" textColor="#87429d"/>
+    <paraStyle name="P2" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="8.0" leading="10" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0" textColor="#000000"/>
+    <paraStyle name="P3" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica-Bold" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0" textColor="#000000"/>
+    <paraStyle name="P4" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="8.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0" textColor="#000000"/>
+    <paraStyle name="P6" fontName="Helvetica" fontSize="8.0" leading="10" alignment="LEFT"/>
+    <paraStyle name="P7" fontName="Helvetica" fontSize="8.0" leading="10" alignment="LEFT"/>
+    <paraStyle name="P8" fontName="Helvetica" fontSize="8.0" leading="10" alignment="CENTER"/>
+    <paraStyle name="P9" fontName="Helvetica" fontSize="8.0" leading="10" alignment="RIGHT"/>
+    <paraStyle name="P11" fontName="Helvetica-Bold" fontSize="8.0" leading="10" alignment="LEFT" textColor="#87429d"/>
+    <paraStyle name="P12" fontName="Helvetica" fontSize="8.0" leading="10" alignment="LEFT" textColor="#000000"/>
+    <paraStyle name="P13" fontName="Helvetica" fontSize="8.0" leading="10" alignment="RIGHT"/>
+    <paraStyle name="P14" fontName="Helvetica" fontSize="8.0" leading="10" alignment="RIGHT"/>
+    <paraStyle name="P16" fontName="Helvetica" fontSize="6.0" leading="8" alignment="LEFT" textColor="#666666"/>
+    <paraStyle name="P18" fontName="Helvetica" fontSize="8.0" leading="10" alignment="LEFT"/>
+    <paraStyle name="P20" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="8.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="P21" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="8.0" leading="10" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0" textColor="#87429d"/>
+    <paraStyle name="P22" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="8.0" leading="10" alignment="RIGHT" spaceBefore="0.0" spaceAfter="0.0"/>
+  </stylesheet>
+  <story>
+    <section>
+      <para style="P1">[[ repeatIn(objects,'o') ]]</para>
+      <para style="P1">[[ setLang(o.partner_id.lang) ]]</para>
+      <blockTable colWidths="499.0" style="Tabla3">
+        <tr>
+            <td>
+                <para style="P1">[[ o.company_id.tipo_comprobante.name]] [[o.number or '']]</para>
+            </td>
+        </tr>
+      </blockTable>
+      <blockTable colWidths="125.0,374.0" style="Tabla1">
+        <tr>
+          <td>
+            <para style="P22">[[ o.company_id.logo and setTag('para','image',{'width':'155.0','height':'80.0'}) ]] [[ o.company_id.logo ]]</para>
+          </td>
+          <td>
+            <para style="P3">[[ o.company_id.name ]]</para>
+            <para style="P2">[[ o.company_id.street or '' ]] No. [[ o.company_id.partner_id.address[0].street3]] Int. [[o.company_id.partner_id.address[0].street4 or 'N/A']], Col. [[ o.company_id.street2 or '' ]]</para>
+            <para style="P2">CP: [[o.company_id.zip or '' ]]. [[ o.company_id.city or '' ]], [[ o.company_id.state_id.name or '']]</para>
+            <para style="P2">RFC: [[ o.company_id.vat ]]</para>
+            <para style="P3">[[ o.cfdi_regimen_fiscal.name or '']]</para>
+            <para style="P2">
+              <font color="white"> </font>
+            </para>
+            <para style="P2">
+              <font color="white"> </font>
+            </para>
+          </td>
+        </tr>
+      </blockTable>
+      <blockTable colWidths="300.0,199.0" style="Tabla1">
+        <tr>
+          <td>
+            <blockTable colWidths="275.0" style="Tabla2">
+              <tr>
+                <td>
+                  <para style="P6">Vendido a:</para>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <para style="P11">[[ o.partner_id.name ]]</para>
+                  <para style="P12">R.F.C: [[ o.partner_id.vat ]]</para>
+                  <para style="P4">[[ o.address_invoice_id.street ]] No. [[ o.address_invoice_id.street3 ]] Int. [[o.address_invoice_id.street4 or 'N/A']]</para>
+                  <para style="P4">[[ o.address_invoice_id.street2 or '' ]]. C.P. [[ o.address_invoice_id.zip or '' ]]</para>
+                  <para style="P4">[[ o.address_invoice_id.city or '' ]], [[ o.address_invoice_id.state_id and o.address_invoice_id.state_id.name or '' ]].</para>
+                </td>
+              </tr>
+            </blockTable>
+          </td>
+          <td>
+            <blockTable colWidths="190.0" style="Tabla2">
+              <tr>
+                <td>
+                  <para style="P6">Factura Eléctronica:</para>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                    <para style="P11">Folio Fiscal:</para>
+                    <para style="P6">[[ o.UUID or 'FACTURA NO VALIDA' ]]</para>
+                    <para style="P11">[[ o.state == 'cancel' and 'FACTURA CANCELADA' ]]</para>
+                    <para style="P11">No de Serie del Certificado del CSD</para>
+                    <para style="P6">[[ o.id_cfdi_rnet.numero_serie or '' ]]</para>
+                    <para style="P11">Lugar, Fecha y Hora de Expedición:</para>
+                    <para style="P6">[[ o.cfdi_lugarExpedicion ]] a [[ o.cfdi_fecha]]</para>
+                    <para style="P11">No de Serie del Certificado del SAT</para>
+                    <para style="P6">[[ o.noCertificadoSAT or '']]</para>
+                    <para style="P11">Fecha y Hora de Certificación</para>
+                    <para style="P6">[[ o.fechaTimbrado or '' ]]</para>
+                    <para style="P6">Origen: [[ o.origin or removeParentNode('para') ]]</para>
+                </td>
+              </tr>
+            </blockTable>
+          </td>
+        </tr>
+      </blockTable>
+      <blockTable colWidths="42.0,40.0,261.0,81.0,75.0" style="Tabla2">
+        <tr>
+          <td>
+            <para style="P8">Cantidad</para>
+          </td>
+          <td>
+            <para style="P8">Unidad</para>
+          </td>
+          <td>
+            <para style="P7">Descripción</para>
+          </td>
+          <td>
+            <para style="P7">P. Unitario</para>
+          </td>
+          <td>
+            <para style="P7">Importe</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para style="P8">
+              <font face="Helvetica">[[ repeatIn(o.invoice_line,'l') ]]</font>
+              <font face="Helvetica">[[ formatLang(l.quantity) ]]</font>
+            </para>
+          </td>
+          <td>
+            <para style="P8">[[ (l.uos_id and l.uos_id.name) or 'No Aplica' ]]</para>
+          </td>
+          <td>
+            <para style="P7">[[ l.name ]]</para>
+            <para style="P16">Notas: [[l.note or removeParentNode('para')]]</para>
+          </td>
+          <td>
+            <para style="P9">$ [[ formatLang(l.price_unit) ]]</para>
+          </td>
+          <td>
+            <para style="P9">$ [[ (formatLang(l.quantity * l.price_unit)) or formatLang(l.price_subtotal) ]]</para>
+          </td>
+        </tr>
+      </blockTable>
+      <blockTable colWidths="412.0,87.0" style="Tabla1">
+        <tr>
+          <td>
+            <para style="P9">Sub Total: $</para>
+          </td>
+          <td>
+            <para style="P9">[[ formatLang(o.amount_untaxed) ]]</para>
+          </td>
+        </tr>
+        <tr>
+        [[ repeatIn( o.tax_line, 'tax' ) ]]
+          <td>
+            <para style="P13">[[ tax.name ]]: $</para>
+          </td>
+          <td>
+            <para style="P14">[[ formatLang(tax.amount) ]]</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para style="P9">Total: $</para>
+          </td>
+          <td>
+            <para style="P9">[[ formatLang(o.amount_total) ]]</para>
+          </td>
+        </tr>
+      </blockTable>
+      <blockTable colWidths="350.0, 149.0" style="Tabla4">
+        <tr>
+          <td>
+            <para style="P21">IMPORTE CON LETRA:</para>
+          </td>
+          <td><para style="P21"></para></td>
+        </tr>
+        <tr>
+          <td>
+            <para style="P20">[[ o.amount_to_text ]]</para>
+          </td>
+          <td></td>
+        </tr>
+      </blockTable>
+      <blockTable colWidths="166,166,166" style="Tabla1">
+        <tr>
+          <td>
+            <para style="P21">Forma de Pago</para>
+          </td>
+          <td>
+            <para style="P21">Metódo de Pago</para>
+          </td>
+          <td>
+            <para style="P21">Número de Cuenta</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para style="P8">[[ o.cfdi_forma_pago.name or '' ]]</para>
+          </td>
+          <td>
+            <para style="P8">[[ o.cfdi_metodo_pago.name or '' ]]</para>
+          </td>
+          <td>
+            <para style="P8">[[ o.cfdi_cuatro_digitos or '' ]]</para>
+          </td>
+        </tr>
+      </blockTable>
+      <blockTable colWidths="155.0,343.0" style="Tabla1">
+        <tr>
+          <td>
+            <para style="P6">[[ o.cbb and setTag('para','image',{'width':'150.0','height':'150.0'}) ]][[ o.cbb ]]</para>
+          </td>
+          <td>
+            <para style="invisible">...</para>
+            <blockTable colWidths="338.0" style="Tabla2">
+              <tr>
+                <td>
+                  <para style="P6">Sello Digital del CFDI:</para>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                    <para style="P18">[[ o.selloCFDI or '' ]]</para>
+                </td>
+              </tr>
+            </blockTable>
+            <blockTable colWidths="338.0" style="Tabla2">
+              <tr>
+                <td>
+                  <para style="P6">Sello del SAT:</para>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                    <para style="P18">[[ o.selloSAT or '' ]]</para>
+                </td>
+              </tr>
+            </blockTable>
+            <blockTable colWidths="338.0" style="Tabla2">
+              <tr>
+                <td>
+                  <para style="P6">Cadena Original del Complemento de Certificación digital del SAT:</para>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                    <para style="P18">[[ o.cfdi_cadena_original or '' ]]</para>
+                </td>
+              </tr>
+            </blockTable>
+          </td>
+        </tr>
+      </blockTable>
+      <blockTable colWidths="499.0" style="Tabla1">
+        <tr>
+          <td>
+            <para style="P3">ESTE DOCUMENTO ES UNA REPRESENTACIÓN IMPRESA DE UN CFDI</para>
+          </td>
+        </tr>
+      </blockTable>
+      <para style="Standard">
+        <font color="white"> </font>
+      </para>
+    </section>
+  </story>
+</document>

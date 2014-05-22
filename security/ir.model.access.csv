@@ -1,0 +1,11 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+"acceso_cfdi_forma_pago","Forma de Pago","model_cfdi_forma_pago","cfdi_admin",1,1,1,1
+"acceso_cfdi_metodo_pago","Metodo de Pago","model_cfdi_metodo_pago","cfdi_admin",1,1,1,1
+"acceso_cfdi_tipo_comprobante","Tipo de Comprobante","model_cfdi_tipo_comprobante","cfdi_admin",1,1,1,1
+"acceso_cfdi_regimen_fiscal","Regimen Fiscal","model_cfdi_regimen_fiscal","cfdi_admin",1,1,1,1
+"acceso_cfdi_rnet","CFDI rNet","model_cfdi_rnet","cfdi_admin",1,1,1,1
+"acceso_cfdi_forma_pago_read","Forma de Pago","model_cfdi_forma_pago","cfdi_read",1,1,0,0
+"acceso_cfdi_metodo_pago_read","Metodo de Pago","model_cfdi_metodo_pago","cfdi_read",1,1,0,0
+"acceso_cfdi_tipo_comprobante_read","Tipo de Comprobante","model_cfdi_tipo_comprobante","cfdi_read",1,1,0,0
+"acceso_cfdi_regimen_fiscal_read","Regimen Fiscal","model_cfdi_regimen_fiscal","cfdi_read",1,1,0,0
+"acceso_cfdi_rnet_read","CFDI rNet","model_cfdi_rnet","cfdi_read",1,1,0,0

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+         
+        <!-- VISTA DE FORMULARIO PARA LA CONFIGURACIÓN DE CFDI EN LA COMPAÑIA -->
+        <record model="ir.ui.view" id="view_res_company_cfdi_form">
+            <field name="name">view.res.company.cfdi.form</field>
+            <field name="inherit_id" ref="base.view_company_form"/>
+            <field name="model">res.company</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <xpath expr="/form/group/group/field[@name='parent_id']" position="after">
+                    <group col="4" colspan="4">
+                        <field name="cfdi"/>
+                        <field name="regimen_fiscal" widget="selection"/>
+                        <field name="tipo_comprobante" widget="selection"/>
+                    </group>
+                </xpath>
+            </field>    
+        </record>
+        
+     </data>
+ </openerp>
