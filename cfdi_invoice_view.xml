@@ -43,6 +43,9 @@
            </button>
            </field>
         </record>
-        
+        <menuitem name="Facturas Enviadas"
+            id="cfdi_menu_email_message"
+            parent="account.menu_finance_receivables"
+            action="mail.action_view_mail_message" />       
     </data>
 </openerp>
