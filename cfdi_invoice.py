@@ -25,8 +25,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-#http://chart.apis.google.com/chart?chs=200x200&cht=qr&chl=?re=XAXX010101000%26rr=XAXX010101000%26tt=1234567890.123456%26id=ad662d33-6934-459c-a128-BDf0393f0f44
-#http://zxing.org/w/chart?cht=qr&chs=350x350&chld=H&choe=UTF-8&chl=%3Fre%3DXAXX010101000%26rr%3DXAXX010101000%26tt%3D1234567890.123456%26id%3Dad662d33-6934-459c-a128-BDf0393f0f44
+
 from osv import osv, fields
 import urllib
 import base64 as B64
@@ -45,49 +44,24 @@ from SOAPpy import SOAPProxy
 ERROR = ""
 app_xsltproc = tools.find_in_path("xsltproc")
 
-#class cfdi_account_retenciones(osv):
-#    _name = "cfdi.account.retenciones"
-#    _columns = {
-#        'name' : fields.selection("Retención"),
-#        'importe': fields.float("Importe"),
-#    }
-#    
-#cfdi_account_retenciones()
-
 class cfdi_account_invoice(osv.osv):
 
-    def conv_ascii(self, text):
-        old_chars = ['á', 'é', 'í', 'ó', 'ú', 'à', 'è', 'ì', 'ò', 'ù', 'ä', 'ë', 'ï', 'ö', 'ü', 'â', 'ê', 'î', \
-        'ô', 'û', 'Á', 'É', 'Í', 'Ú', 'Ó', 'À', 'È', 'Ì', 'Ò', 'Ù', 'Ä', 'Ë', 'Ï', 'Ö', 'Ü', 'Â', 'Ê', 'Î', \
-        'Ô', 'Û', 'ñ', 'Ñ', 'ç', 'Ç', 'ª', 'º', '°', ' ', 'Ã'
-        ]
-        new_chars = ['a', 'e', 'i', 'o', 'u', 'a', 'e', 'i', 'o', 'u', 'a', 'e', 'i', 'o', 'u', 'a', 'e', 'i', \
-        'o', 'u', 'A', 'E', 'I', 'U', 'O', 'A', 'E', 'I', 'O', 'U', 'A', 'E', 'I', 'O', 'U', 'A', 'E', 'I', \
-        'O', 'U', 'n', 'N', 'c', 'C', 'a', 'o', 'o', ' ', 'A'
-        ]
-        for old, new in zip(old_chars, new_chars):
-            try:
-                text = text.replace(unicode(old,'UTF-8'), new)
-            except:
-                try:
-                    text = text.replace(old, new)
-                except:
-                    raise osv.except_osv(('Error !'), 'No se pudo re-codificar la cadena [%s] en la letra [%s]'%(text, old) )
-        return text
-
     def timbrar(self, cr, uid, ids, partner_id, context={}):
-        #raise osv.except_osv("AVISO","El sistema se encuentra en mantenimiento, el servicio de timbrado estará  disponible el 22 de Febrero a partir de las 12:00 hrs.")
         global ERROR
         invoice = self.browse(cr,uid,ids)
         inv = invoice[0]
-        xml = self.genera_xml(cr,uid,ids,partner_id)
-        xml = self.conv_ascii(xml.toxml(encoding='utf-8'))
-        #raise osv.except_osv(("ERROR!"),("Se encontraron los siguientes errores:\n%s")%(xml))
-        a = SOAPProxy("https://ws2.bovedacomprobante.net/ws/service.asmx")
+        timbres = inv.id_cfdi_rnet.timbres_comprados - inv.id_cfdi_rnet.timbres_usados
+        if timbres < 1:
+            aviso = ("Timbres comprados: %s, Timbres usados: %s\n%s") % (inv.id_cfdi_rnet.timbres_comprados, inv.id_cfdi_rnet.timbres_usados, inv.id_cfdi_rnet.aviso)
+            raise osv.except_osv("AVISO",aviso)
         user = inv.id_cfdi_rnet.pac_usuario
         pw = inv.id_cfdi_rnet.pac_password
         if not user or not pw:
-            ERROR = ERROR + "No estan configurados los datos del PAC\n"
+            raise osv.except_osv("AVISO","No se encuentran configurados los datos del PAC, no es posible timbrar!")
+        xml = self.genera_xml(cr,uid,ids,partner_id)
+        xml = xml.toxml(encoding='utf-8')
+        a = SOAPProxy("https://ws2.bovedacomprobante.net/ws/service.asmx")
+        if ERROR not in ("", "--"):
             error = ERROR
             ERROR = "--"
             raise osv.except_osv(("ERROR!"),("Se encontraron los siguientes errores:\n%s")%(error))
@@ -153,7 +127,10 @@ class cfdi_account_invoice(osv.osv):
                 'cfdi_lugarExpedicion': cfdi_lugarExpedicion,
                 }
             self.write(cr, uid, ids, data, context)
-            return False
+            vals = {
+                'timbres_usados': inv.id_cfdi_rnet.timbres_usados +1,
+            }
+            return inv.id_cfdi_rnet.write(vals)
         
     def agregarEspacios(self, cadena, caracteres):
         data = ""
@@ -353,27 +330,27 @@ class cfdi_account_invoice(osv.osv):
             (filesalida, salida) = tempfile.mkstemp(".xml","salida")
         except:
             ERROR = ERROR + "No se pudieron cargar los archivos para generar la cadena original.\n"
+            error = ERROR
+            ERROR = "--"
+            raise osv.except_osv("ERROR",error)
         cadena_original = ""
-        try:
-            f = open(xml_file, 'wb' )
-            f.write(self.conv_ascii(doc.toxml()))
-            f.close()
-            os.close(filexml)
-            pem = "%s" % (B64.decodestring(inv.id_cfdi_rnet.certificado_key_pem),)
-            f = open(pem_file, 'wb' )
-            f.write(pem)
-            f.close()
-            os.close(filepem)
-            cmd = 'xsltproc -o %s %s %s' % (salida, "/opt/openerp/server/openerp/addons/cfdi_rnet/cadena_original_3.2.xslt", xml_file)
-            args = SH.split(cmd)
-            a = SB.call(args)
-            cadena_original = self.leer_archivo(open(salida,"r"))
-            f = open(salida, 'wb')
-            f.write(cadena_original.replace("  "," "))
-            f.close()
-            os.close(filesalida)
-        except:
-            ERROR = ERROR + "No se pudo generar la cadena original.\n"
+        f = open(xml_file, 'wb' )
+        f.write(doc.toxml(encoding='utf-8'))
+        f.close()
+        os.close(filexml)
+        pem = "%s" % (B64.decodestring(inv.id_cfdi_rnet.certificado_key_pem),)
+        f = open(pem_file, 'wb' )
+        f.write(pem)
+        f.close()
+        os.close(filepem)
+        cmd = 'xsltproc -o %s %s %s' % (salida, "/opt/openerp/server/openerp/addons/cfdi_rnet/cadena_original_3.2.xslt", xml_file)
+        args = SH.split(cmd)
+        a = SB.call(args)
+        cadena_original = self.leer_archivo(open(salida,"r"))
+        f = open(salida, 'wb')
+        f.write(cadena_original.replace("  "," "))
+        f.close()
+        os.close(filesalida)
         if cadena_original in (""):
             ERROR = ERROR + "No se pudo generar la cadena original_IF.\n"
         sello=""
@@ -500,6 +477,24 @@ class cfdi_account_invoice(osv.osv):
         result['value'].update(res1)
         return result
         
+    def get_cfdi(self, cr, uid, ids, context=None):
+        id_cmp = self.pool.get('res.company').search(cr,uid,[])
+        compania = self.pool.get('res.company').browse(cr,uid,id_cmp[0])
+        return compania['cfdi'].id
+
+    def get_regimen_fiscal(self, cr, uid, ids, context=None):
+        id_cmp = self.pool.get('res.company').search(cr, uid, [])
+        compania = self.pool.get('res.company').browse(cr, uid, id_cmp[0])
+        return compania['regimen_fiscal'].id
+        
+    def get_forma_pago(self, cr, uid, ids, context=None):
+        fp = self.pool.get("cfdi.forma.pago").search(cr, uid, [('name','=', 'UNA SOLA EXHIBICIÓN')])
+        return fp[0]
+        
+    def get_metodo_pago(self, cr, uid, ids, context=None):
+        mp = self.pool.get("cfdi.metodo.pago").search(cr, uid, [('name','=', 'NO IDENTIFICADO')])
+        return mp[0]
+             
     _inherit = 'account.invoice'
     _columns = {
         'state': fields.selection([
@@ -540,5 +535,9 @@ class cfdi_account_invoice(osv.osv):
     
     _defaults = {
         'cfdi_cuatro_digitos' : '0000',
+        'id_cfdi_rnet': get_cfdi,
+        'cfdi_forma_pago': get_forma_pago,
+        'cfdi_metodo_pago': get_metodo_pago,
+        'cfdi_regimen_fiscal': get_regimen_fiscal
     }
 cfdi_account_invoice()

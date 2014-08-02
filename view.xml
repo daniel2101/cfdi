@@ -29,18 +29,17 @@
             <field name="arch" type="xml">
                 <form string="CFDI">
                     <field name="name" colspan="2"/>
+                    <label string="" colspan="2"/>
                     <notebook colspan="4">
                         <page string="CFDI">
                             <group col="4" colspan="4">
                                 <separator string="Certificado" colspan="4"/>
-                                <group col="4" colspan="2">
+                                <group col="2" colspan="2">
                                     <label string="" colspan="2"/>
                                 </group>
-                                <group col="4" colspan="2">
-                                    <separator string="Cedula de Identificación Fiscal" colspan="4"/>
-                                    <label string="" colspan="1"/>
+                                <group col="2" colspan="2">
+                                    <separator string="Cedula de Identificación Fiscal"/>
                                     <field name="rfc" widget="image" nolabel="1" colspan="2"/>
-                                    <label string="" colspan="1"/>
                                 </group>
                             </group>
                             <group col="4" colspan="4">
@@ -56,8 +55,8 @@
                                 <field name="fecha_inicio"/>
                                 <field name="fecha_fin" readonly="1"/>
                                 <newline/>
-                                <label string="" colspan="2"/><label string="" colspan="2"/>
-                                <button name="get_certificate_info" string="Obtener datos del Certificado" type="object" icon="gtk-execute" colspan="1"/><label string="" colspan="3"/>
+                                <newline/>
+                                <button name="get_certificate_info" string="Obtener datos del Certificado" type="object" icon="gtk-execute" colspan="1"/><label string="" colspan="2"/>
                                 <newline/>
                             </group>
                             <group col="4" colspan="4">
@@ -67,6 +66,21 @@
                                 <field name="pac_api_key"/>
                                 <field name="wsdl" widget="url"/>
                             </group>
+                        </page>
+                        <page string="Timbres" groups="cfdi_rnet.cfdi_admin">
+                            <field name="timbres_comprados"/>
+                            <field name="timbres_usados"/>
+                            <newline/>
+                            <separator string="Registro de compras de timbres" colspan="4"/>
+                            <field name="compras" nolabel="1" colspan="4" widget="one2many_list"/>
+                            <newline/>
+                            <group col="10" colspan="4">
+                                <label string="" colspan="6"/>
+                                <button name="calcular_usados" string="Aproximar Timbres Usados" type="object" icon="gtk-execute"/>
+                                <button name="calcular_timbres" string="Calcular Timbres" type="object" icon="gtk-execute"/>
+                            </group>
+                            <separator string="Aviso de timbres agotados" colspan="4"/>
+                            <field name="aviso" nolabel="1" colspan="4"/>
                         </page>
                     </notebook>
                 </form>
@@ -81,6 +95,50 @@
             <field name="view_mode">tree,form</field>
         </record>
         
+        <!-- VISTA DE ARBOL COMPRAS DE TIMBRES -->
+        <record id="cfdi_compras_tree" model="ir.ui.view">
+            <field name="name">cfdi.compras.tree</field>
+            <field name="model">cfdi.compras</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Compra de Timbres" colors='gray:state=="borrador";blue:state=="valido"'>
+                    <field name="fecha"/>
+                    <field name="name"/>
+                    <field name="state"/>
+                    <field name="timbres" sum="Total de Timbres"/>
+                    <field name="total" sum="Total $ "/>
+                </tree>
+            </field>
+        </record>
+        
+        <!-- VISTA DE FORMULARIO COMPRA DE TIMBRES -->
+        <record id="cfdi_compras_form" model="ir.ui.view">
+            <field name="name">cfdi.compras.form</field>
+            <field name="model">cfdi.compras</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Registro de Compra">
+                    <group col="6" colspan="4">
+                        <field name="name" colspan="4"/>
+                        <field name="fecha"/>
+                    </group>
+                    <group colspan="4" col="4">
+                        <field name="timbres"/>
+                        <field name="total"/>
+                    </group>
+                    <field name="state" widget="statusbar"/>
+                </form>
+            </field>
+        </record>
+        
+        <!-- ACCIONES PARA COMPRA DE TIMBRES -->
+        <record id="action_cfdi_compras" model="ir.actions.act_window">
+            <field name="name">Compra de timbres</field>
+            <field name="res_model">cfdi.compras</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+                
         <!-- VISTA DE ARBOL FORMA DE PAGO-->
         <record model="ir.ui.view" id="cfdi_forma_pago_tree">
             <field name="name">cfdi.forma.pago.tree</field>
