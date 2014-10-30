@@ -8,6 +8,10 @@
             <field name="inherit_id" ref="account.invoice_form"/>
             <field name="type">form</field>
             <field name="arch" type="xml">
+                <field name="name" position="after">
+                    <field name="tipoComprobante" attrs="{'readonly':[('state','!=','draft')]}" groups="base.group_extended"/>
+                    <button name="check_timbres" string="Timbres Disponibles" type="object" groups="base.group_extended"/>
+                </field>
                 <field name="name" position="before">
                     <newline/>
                     <group colspan="4" col="6">
@@ -22,12 +26,13 @@
                 </field>
                 <button name="invoice_open" position="after">
                     <button name="timbrar" string="Timbrar" states="open" type="object" icon="gtk-apply"/>
+                    <button name="cancelar" string="Cancelar SAT" states="timbrada" type="object" icon="gtk-cancel"/>
                 </button>
                 <button name="%(account.account_invoices)d" position="replace">
                     <button name="%(account.account_invoices)d" string="Imprimir Factura" type="action" icon="gtk-print" states="open,timbrada,paid,proforma,sale,proforma2"/>
                 </button>
                 <field name="state" position="replace">
-                    <field name="state" widget="statusbar" statusbar_visible="draft,open,timbrada,paid" statusbar_colors="{&quot;proforma&quot;:&quot;blue&quot;,&quot;proforma2&quot;:&quot;blue&quot;}"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,open,timbrada,paid" statusbar_colors="{&quot;proforma&quot;:&quot;blue&quot;,&quot;proforma2&quot;:&quot;blue&quot;,&quot;cancelada&quot;:&quot;red&quot;}"/>
                 </field>
             </field>
         </record>

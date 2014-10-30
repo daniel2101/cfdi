@@ -29,6 +29,19 @@
 from osv import osv, fields
 
 class res_partner(osv.osv):
+    
+    def get_forma_pago(self, cr, uid, ids, context=None):
+        fp = self.pool.get("cfdi.forma.pago").search(cr, uid, [('name','=', 'UNA SOLA EXHIBICIÓN')])
+        if len(fp)>0:
+            return fp[0]
+        return False
+        
+    def get_metodo_pago(self, cr, uid, ids, context=None):
+        mp = self.pool.get("cfdi.metodo.pago").search(cr, uid, [('name','=', 'NO IDENTIFICADO')])
+        if len(mp)>0:
+            return mp[0]
+        return False
+
     _inherit = "res.partner"
     
     _columns = {
@@ -38,6 +51,8 @@ class res_partner(osv.osv):
     
     _defaults = {
         'vat': "XAXX010101000",
+        'cfdi_forma_pago': get_forma_pago,
+        'cfdi_metodo_pago': get_metodo_pago,
     }
     
 res_partner()

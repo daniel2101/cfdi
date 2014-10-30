@@ -25,8 +25,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-#http://chart.apis.google.com/chart?chs=200x200&cht=qr&chl=?re=XAXX010101000%26rr=XAXX010101000%26tt=1234567890.123456%26id=ad662d33-6934-459c-a128-BDf0393f0f44
-#http://zxing.org/w/chart?cht=qr&chs=350x350&chld=H&choe=UTF-8&chl=%3Fre%3DXAXX010101000%26rr%3DXAXX010101000%26tt%3D1234567890.123456%26id%3Dad662d33-6934-459c-a128-BDf0393f0f44
+
 from osv import osv, fields
 import urllib
 import base64 as B64
@@ -40,54 +39,38 @@ import lxml.etree as ET
 import tools
 import subprocess as SB
 import shlex as SH
+import hashlib
 from SOAPpy import SOAPProxy
 
 ERROR = ""
 app_xsltproc = tools.find_in_path("xsltproc")
 
-#class cfdi_account_retenciones(osv):
-#    _name = "cfdi.account.retenciones"
-#    _columns = {
-#        'name' : fields.selection("Retención"),
-#        'importe': fields.float("Importe"),
-#    }
-#    
-#cfdi_account_retenciones()
-
 class cfdi_account_invoice(osv.osv):
 
-    def conv_ascii(self, text):
-        old_chars = ['á', 'é', 'í', 'ó', 'ú', 'à', 'è', 'ì', 'ò', 'ù', 'ä', 'ë', 'ï', 'ö', 'ü', 'â', 'ê', 'î', \
-        'ô', 'û', 'Á', 'É', 'Í', 'Ú', 'Ó', 'À', 'È', 'Ì', 'Ò', 'Ù', 'Ä', 'Ë', 'Ï', 'Ö', 'Ü', 'Â', 'Ê', 'Î', \
-        'Ô', 'Û', 'ñ', 'Ñ', 'ç', 'Ç', 'ª', 'º', '°', ' ', 'Ã'
-        ]
-        new_chars = ['a', 'e', 'i', 'o', 'u', 'a', 'e', 'i', 'o', 'u', 'a', 'e', 'i', 'o', 'u', 'a', 'e', 'i', \
-        'o', 'u', 'A', 'E', 'I', 'U', 'O', 'A', 'E', 'I', 'O', 'U', 'A', 'E', 'I', 'O', 'U', 'A', 'E', 'I', \
-        'O', 'U', 'n', 'N', 'c', 'C', 'a', 'o', 'o', ' ', 'A'
-        ]
-        for old, new in zip(old_chars, new_chars):
-            try:
-                text = text.replace(unicode(old,'UTF-8'), new)
-            except:
-                try:
-                    text = text.replace(old, new)
-                except:
-                    raise osv.except_osv(('Error !'), 'No se pudo re-codificar la cadena [%s] en la letra [%s]'%(text, old) )
-        return text
+    def check_timbres(self, cr, uid, ids, partner_id, context={}):
+        invoice = self.browse(cr,uid,ids)
+        inv = invoice[0]
+        timbres_c = inv.id_cfdi_rnet.timbres_comprados
+        timbres_u = inv.id_cfdi_rnet.timbres_usados
+        aviso = "El Número de timbres comprados es: %s\nEl Número de timbres usados es: %s\nUsted tiene: %s timbres disponibles.\n" % (timbres_c, timbres_u, timbres_c - timbres_u)
+        raise osv.except_osv("Aviso!", aviso)
 
     def timbrar(self, cr, uid, ids, partner_id, context={}):
-        #raise osv.except_osv("AVISO","El sistema se encuentra en mantenimiento, el servicio de timbrado estará  disponible el 22 de Febrero a partir de las 12:00 hrs.")
         global ERROR
         invoice = self.browse(cr,uid,ids)
         inv = invoice[0]
-        xml = self.genera_xml(cr,uid,ids,partner_id)
-        xml = self.conv_ascii(xml.toxml(encoding='utf-8'))
-        #raise osv.except_osv(("ERROR!"),("Se encontraron los siguientes errores:\n%s")%(xml))
-        a = SOAPProxy("https://ws2.bovedacomprobante.net/ws/service.asmx")
+        timbres = inv.id_cfdi_rnet.timbres_comprados - inv.id_cfdi_rnet.timbres_usados
+        if timbres < 1:
+            aviso = ("Timbres comprados: %s, Timbres usados: %s\n%s") % (inv.id_cfdi_rnet.timbres_comprados, inv.id_cfdi_rnet.timbres_usados, inv.id_cfdi_rnet.aviso)
+            raise osv.except_osv("AVISO",aviso)
         user = inv.id_cfdi_rnet.pac_usuario
         pw = inv.id_cfdi_rnet.pac_password
         if not user or not pw:
-            ERROR = ERROR + "No estan configurados los datos del PAC\n"
+            raise osv.except_osv("AVISO","No se encuentran configurados los datos del PAC, no es posible timbrar!")
+        xml = self.genera_xml(cr,uid,ids,partner_id)
+        xml = xml.toxml(encoding='utf-8')
+        a = SOAPProxy("https://ws2.bovedacomprobante.net/ws/service.asmx")
+        if ERROR not in ("", "--"):
             error = ERROR
             ERROR = "--"
             raise osv.except_osv(("ERROR!"),("Se encontraron los siguientes errores:\n%s")%(error))
@@ -153,7 +136,10 @@ class cfdi_account_invoice(osv.osv):
                 'cfdi_lugarExpedicion': cfdi_lugarExpedicion,
                 }
             self.write(cr, uid, ids, data, context)
-            return False
+            vals = {
+                'timbres_usados': inv.id_cfdi_rnet.timbres_usados +1,
+            }
+            return inv.id_cfdi_rnet.write(vals)
         
     def agregarEspacios(self, cadena, caracteres):
         data = ""
@@ -165,7 +151,92 @@ class cfdi_account_invoice(osv.osv):
         return data
     
     def cancelar(self, cr, uid, ids, partner_id):
-        return True
+        invoice = self.browse(cr,uid,ids)[0]
+        # 1.- XML DE CANCELACION
+        mexico = timezone('America/Mexico_City')
+        sa_time = datetime.now(mexico)
+        fecha = sa_time.strftime('%Y-%m-%dT%H:%M:%S')
+        xml_cancelacion = '<Cancelacion xmlns="http://cancelacfd.sat.gob.mx" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Fecha="%s" RfcEmisor="%s"><Folios><UUID>%s</UUID></Folios></Cancelacion>' % (fecha, invoice.company_id.partner_id.vat, invoice.UUID.upper())
+        # 2.- SHA1
+        m = hashlib.sha1()
+        m.update(xml_cancelacion)
+        # 3.- Codificar base64 hash
+        DigestValue = B64.encodestring(m.digest())
+        # 4.- XML SignedInfo
+        xml_signedInfo = '<SignedInfo xmlns="http://www.w3.org/2000/09/xmldsig#" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"></CanonicalizationMethod><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"></SignatureMethod><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"></Transform></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"></DigestMethod><DigestValue>%s</DigestValue></Reference></SignedInfo>' % DigestValue
+        # 5.- Firmar con Private Key en SHA1
+        (filepem, pem_file) = tempfile.mkstemp(".pem","key")
+        (filesalida, signedInfo_file) = tempfile.mkstemp(".xml","signed")
+        pem = "%s" % (B64.decodestring(invoice.id_cfdi_rnet.certificado_key_pem),)
+        f = open(pem_file, 'wb' )
+        f.write(pem)
+        f.close()
+        os.close(filepem)
+        f2 = open(signedInfo_file, 'wb')
+        f2.write(xml_signedInfo.replace("\n",""))
+        f2.close()
+        os.close(filesalida)
+        cmd = 'openssl dgst -sha1 -sign %s %s' % (pem_file, signedInfo_file)
+        args = SH.split(cmd)
+        a = SB.check_output(args)
+        firma = B64.encodestring(a)
+        # 6.- Extraer datos del certificado
+        certificate_lib = self.pool.get('facturae.certificate.library')
+        certificado = invoice.id_cfdi_rnet.certificado_pem
+        fname_cer_der = certificate_lib.b64str_to_tempfile(certificado, file_suffix='.der.cer', file_prefix='openerp__' + (False or '') + '__ssl__', )
+        serial = "%s" % int(certificate_lib._get_params(fname_cer_der, params=['serial'], type="PEM").replace("serial=","").replace(" ",""),16)
+        name = certificate_lib._get_params(fname_cer_der, params=['issuer'], type="PEM").replace("issuer= ","")
+        # 7.- Crear XML Final
+        signature = '<Signature xmlns="http://www.w3.org/2000/09/xmldsig#">'+xml_signedInfo+'<SignatureValue>'+firma+'</SignatureValue>'
+        keyInfo = '<KeyInfo><X509Data><X509IssuerSerial><X509IssuerName>'+name+'</X509IssuerName><X509SerialNumber>'+serial+'</X509SerialNumber></X509IssuerSerial><X509Certificate>'+B64.decodestring(certificado).replace("-----BEGIN CERTIFICATE-----","").replace("-----END CERTIFICATE-----","")+'</X509Certificate></X509Data></KeyInfo></Signature>'
+        xml_final = '<?xml version="1.0" encoding="UTF-8"?>'+xml_cancelacion.replace("</Cancelacion>", "")+signature+keyInfo+"</Cancelacion>"
+        xml_final = self.cambiar_caracteres(xml_final.replace("\n",""))
+        # 8.- Solicitar cancelacion al PAC
+        user = invoice.id_cfdi_rnet.pac_usuario
+        pw = invoice.id_cfdi_rnet.pac_password
+        if not user or not pw:
+            raise osv.except_osv("AVISO","No se encuentran configurados los datos del PAC, no es posible cancelar!")
+        a = SOAPProxy("https://ws2.bovedacomprobante.net/ws/service.asmx")
+        env = '<?xml version="1.0" encoding="utf-8"?><soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Header><AuthSoapHd xmlns="http://tempuri.org/"><strUserName>'+user+'</strUserName><strPassword>'+pw+'</strPassword></AuthSoapHd></soap:Header><soap:Body><CancelTicketExtended xmlns="http://tempuri.org/"><base64Cfd>'+B64.encodestring(xml_final)+'</base64Cfd></CancelTicketExtended></soap:Body></soap:Envelope>'
+        ns = None
+        sa = "http://tempuri.org/CancelTicketExtended" #soap action
+        r, a.namespace = a.transport.call(a.proxy, env, ns, sa, encoding = 'utf-8', http_proxy = a.http_proxy, config = a.config)
+        xml_respuesta = minidom.parseString(r)
+        # 9.- Validar la respuesta del PAC
+        estado = xml_respuesta.getElementsByTagName("state")[0].firstChild.data
+        descripcion = xml_respuesta.getElementsByTagName("Descripcion")[0].firstChild.data
+        if estado not in ("201"):
+            raise osv.except_osv("Aviso", descripcion)
+        # 10.- Cambiar estado a cancelado y escribir xml de cancelacion
+        data_attach = {
+                    'name': 'Cancelada_'+invoice.number+'.xml',
+                    'datas': B64.encodestring(xml_final),
+                    'datas_fname': 'Cancelada_'+invoice.number+'.xml',
+                    'description': 'Factura-E Cancelada XML',
+                    'res_model': self._name,
+                    'res_id': invoice.id,
+        }
+        self.pool.get('ir.attachment').create(cr, uid, data_attach, context=context)
+        data_attach = {
+                    'name': 'Cancelada_PAC_'+invoice.number+'.xml',
+                    'datas': B64.encodestring(r),
+                    'datas_fname': 'Cancelada_PAC_'+invoice.number+'.xml',
+                    'description': 'Factura-E Cancelada PAC XML',
+                    'res_model': self._name,
+                    'res_id': invoice.id,
+        }
+        self.pool.get('ir.attachment').create(cr, uid, data_attach, context=context)
+        data = {
+            'fechaCancelacion': xml_respuesta.getElementsByTagName("Fecha")[0].firstChild.data,
+            'state': 'cancelada',
+        }
+        return self.write(cr, uid, ids, data, context)
+        
+    def cambiar_caracteres(self, string):
+        string = string.encode('utf8')
+        resultado = string.replace("\\xc3\\x81", "Á").replace("\\xc3\\x89", "É").replace("\\xc3\\x8d", "Í").replace("\\xc3\\x93", "Ó").replace("\\xc3\\x9a", "Ú").replace("\\xc3\\xa1", "á").replace("\\xc3\\xa9","é").replace("\\xc3\\xad","í").replace("\\xc3\\xb3","ó").replace("\\xc3\\xba","ú").replace("\\xc3\\x91", "Ñ").replace("\\xc3\\xb1","ñ")
+        resultado = resultado.replace("\\xC3\\x81", "Á").replace("\\xC3\\x89", "É").replace("\\xC3\\x8D", "Í").replace("\\xC3\\x93", "Ó").replace("\\xC3\\x9A", "Ú").replace("\\xC3\\xA1", "á").replace("\\xC3\\xA9","é").replace("\\xC3\\xAD","í").replace("\\xC3\\xB3","ó").replace("\\xC3\\xBA","ú").replace("\\xC3\\x91", "Ñ").replace("\\xC3\\xB1","ñ")
+        return resultado
 
     def genera_xml(self, cr, uid, ids, partner_id):
         global ERROR
@@ -181,7 +252,7 @@ class cfdi_account_invoice(osv.osv):
         certificado = certificado.replace("-----BEGIN CERTIFICATE-----","").replace("-----END CERTIFICATE-----","")
         certificado = certificado.replace("\n","").replace(" ","")
         no_certificado = inv.id_cfdi_rnet.numero_serie
-        tipoComprobante = "ingreso"
+        tipoComprobante = inv.tipoComprobante
         formaDePago =  inv.cfdi_forma_pago.name
         metodoDePago = inv.cfdi_metodo_pago.name
         sello="" #sello
@@ -353,27 +424,27 @@ class cfdi_account_invoice(osv.osv):
             (filesalida, salida) = tempfile.mkstemp(".xml","salida")
         except:
             ERROR = ERROR + "No se pudieron cargar los archivos para generar la cadena original.\n"
+            error = ERROR
+            ERROR = "--"
+            raise osv.except_osv("ERROR",error)
         cadena_original = ""
-        try:
-            f = open(xml_file, 'wb' )
-            f.write(self.conv_ascii(doc.toxml()))
-            f.close()
-            os.close(filexml)
-            pem = "%s" % (B64.decodestring(inv.id_cfdi_rnet.certificado_key_pem),)
-            f = open(pem_file, 'wb' )
-            f.write(pem)
-            f.close()
-            os.close(filepem)
-            cmd = 'xsltproc -o %s %s %s' % (salida, "/opt/openerp/server/openerp/addons/cfdi_rnet/cadena_original_3.2.xslt", xml_file)
-            args = SH.split(cmd)
-            a = SB.call(args)
-            cadena_original = self.leer_archivo(open(salida,"r"))
-            f = open(salida, 'wb')
-            f.write(cadena_original.replace("  "," "))
-            f.close()
-            os.close(filesalida)
-        except:
-            ERROR = ERROR + "No se pudo generar la cadena original.\n"
+        f = open(xml_file, 'wb' )
+        f.write(doc.toxml(encoding='utf-8'))
+        f.close()
+        os.close(filexml)
+        pem = "%s" % (B64.decodestring(inv.id_cfdi_rnet.certificado_key_pem),)
+        f = open(pem_file, 'wb' )
+        f.write(pem)
+        f.close()
+        os.close(filepem)
+        cmd = 'xsltproc -o %s %s %s' % (salida, "/opt/openerp/server/openerp/addons/cfdi_rnet/cadena_original_3.2.xslt", xml_file)
+        args = SH.split(cmd)
+        a = SB.call(args)
+        cadena_original = self.leer_archivo(open(salida,"r"))
+        f = open(salida, 'wb')
+        f.write(cadena_original.replace("  "," "))
+        f.close()
+        os.close(filesalida)
         if cadena_original in (""):
             ERROR = ERROR + "No se pudo generar la cadena original_IF.\n"
         sello=""
@@ -500,6 +571,28 @@ class cfdi_account_invoice(osv.osv):
         result['value'].update(res1)
         return result
         
+    def get_cfdi(self, cr, uid, ids, context=None):
+        id_cmp = self.pool.get('res.company').search(cr,uid,[])
+        compania = self.pool.get('res.company').browse(cr,uid,id_cmp[0])
+        return compania['cfdi'].id
+
+    def get_regimen_fiscal(self, cr, uid, ids, context=None):
+        id_cmp = self.pool.get('res.company').search(cr, uid, [])
+        compania = self.pool.get('res.company').browse(cr, uid, id_cmp[0])
+        return compania['regimen_fiscal'].id
+        
+    def get_forma_pago(self, cr, uid, ids, context=None):
+        fp = self.pool.get("cfdi.forma.pago").search(cr, uid, [('name','=', 'UNA SOLA EXHIBICIÓN')])
+        if len(fp)>0:
+            return fp[0]
+        return False
+        
+    def get_metodo_pago(self, cr, uid, ids, context=None):
+        mp = self.pool.get("cfdi.metodo.pago").search(cr, uid, [('name','=', 'NO IDENTIFICADO')])
+        if len(mp)>0:
+            return mp[0]
+        return False
+             
     _inherit = 'account.invoice'
     _columns = {
         'state': fields.selection([
@@ -508,6 +601,7 @@ class cfdi_account_invoice(osv.osv):
             ('proforma2','Pro-forma'),
             ('open','Open'),
             ('timbrada','Timbrada'),
+            ('cancelada', 'Cancelada SAT'),
             ('paid','Paid'),
             ('cancel','Cancelled')
             ],'State', select=True, readonly=True,
@@ -516,6 +610,10 @@ class cfdi_account_invoice(osv.osv):
             \n* The \'Open\' state is used when user create invoice,a invoice number is generated.Its in open state till user does not pay invoice. \
             \n* The \'Paid\' state is set automatically when the invoice is paid. Its related journal entries may or may not be reconciled. \
             \n* The \'Cancelled\' state is used when user cancel invoice.'),
+        'tipoComprobante': fields.selection([
+            ('ingreso','Ingreso'),
+            ('egreso','Egreso')
+            ], "Tipo de Comprobante", required=True),
         #No de serie del Certificado del CSD
         'id_cfdi_rnet': fields.many2one('cfdi.rnet', "DATOS CFDI"),
         'cfdi_forma_pago': fields.many2one('cfdi.forma.pago',"Forma de Pago"),
@@ -534,11 +632,16 @@ class cfdi_account_invoice(osv.osv):
         'noCertificadoSAT': fields.text("Certificado SAT"),
         'selloSAT': fields.text("Sello SAT"),
         'cbb': fields.binary("Codigo de Barras"),
-        #'retenciones': fields.many2many(),
-        #'total_retenciones':
+        #Fecha de Cancelacion
+        'fechaCancelacion': fields.char("Fecha de Cancelacion", size=30),
     }
     
     _defaults = {
+        'tipoComprobante': 'ingreso',
         'cfdi_cuatro_digitos' : '0000',
+        'id_cfdi_rnet': get_cfdi,
+        'cfdi_forma_pago': get_forma_pago,
+        'cfdi_metodo_pago': get_metodo_pago,
+        'cfdi_regimen_fiscal': get_regimen_fiscal
     }
 cfdi_account_invoice()

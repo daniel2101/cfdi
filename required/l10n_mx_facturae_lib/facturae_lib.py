@@ -115,16 +115,7 @@ class facturae_certificate_library(osv.osv):
         result = self._get_params(fname, params=['serial'], fname_out=fname_out, type=type)
         result = result and result.replace('serial=', '').replace('33', 'B').replace('3', '').replace('B', '3').replace(' ', '').replace('\r', '').replace('\n', '').replace('\r\n', '') or ''
         return result
-    
-    def _transform_xml(self, fname_xml, fname_xslt, fname_out):
-        cmd = '"%s" "%s" "%s" >"%s"'%(app_xsltproc_fullpath, fname_xslt, fname_xml, fname_out )
-        args = tuple( cmd.split(' ') )
-        input, output = exec_command_pipe(*args)
-        result = self._read_file_attempts( open(fname_out, "r") )
-        input.close()
-        output.close()
-        return result
-    
+
     def _get_param_dates(self, fname, fname_out=None, date_fmt_return='%Y-%m-%d %H:%M:%S', type='DER'):
         result_dict = self._get_params_dict(fname, params=['dates'], fname_out=fname_out, type=type)
         translate_key = {
@@ -162,38 +153,10 @@ class facturae_certificate_library(osv.osv):
         cmd_params = cmd_params and '-' + cmd_params or ''
         cmd = '"%s" x509 -inform "%s" -in "%s" -noout "%s" -out "%s"'%( 
             app_openssl_fullpath, type, fname, cmd_params, fname_out )
-        args = tuple( cmd.split(' ') )
-        #input, output = tools.exec_command_pipe(*args)
+        args = tuple( cmd.split(' '))
         input, output = exec_command_pipe(*args)
         result = self._read_file_attempts(output)
         input.close()
         output.close()
         return result
-    
-    def _sign(self, fname, fname_xslt, fname_key, fname_out, encrypt='sha1', type_key='PEM'):
-        result = ""
-        cmd = ''
-        if type_key == 'PEM':
-            cmd = '"%s" "%s" "%s" | "%s" dgst -%s -sign "%s" | "%s" enc -base64 -A -out "%s"'%(
-                app_xsltproc_fullpath, fname_xslt, fname, app_openssl_fullpath, encrypt, fname_key, app_openssl_fullpath, fname_out)
-        elif type_key == 'DER':
-            #TODO: Dev for type certificate DER
-            pass
-        if cmd:
-            input, output = exec_command_pipe(cmd)
-            result = self._read_file_attempts( open(fname_out, "r") )
-            input.close()
-            output.close()
-        return result
-    
-    #Funciones en desuso
-    def binary2file(self, cr=False, uid=False, ids=[], binary_data=False, file_prefix="", file_suffix=""):
-        (fileno, fname) = tempfile.mkstemp(file_suffix, file_prefix)
-        f = open( fname, 'wb' )
-        f.write( base64.decodestring( binary_data ) )
-        f.close()
-        os.close( fileno )
-        return fname
 facturae_certificate_library()
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

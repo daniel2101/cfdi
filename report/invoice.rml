@@ -71,7 +71,7 @@
       <blockTable colWidths="499.0" style="Tabla3">
         <tr>
             <td>
-                <para style="P1">[[ o.company_id.tipo_comprobante.name]]</para>
+                <para style="P1">[[ (o.tipoComprobante == 'egreso' and 'NOTA DE CREDITO') or o.company_id.tipo_comprobante.name]] [[o.number or '']]</para>
             </td>
         </tr>
       </blockTable>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="1">
+        
+        <record id="cfdi_metodo_pago_1" model="cfdi.metodo.pago">
+            <field name="name">NO IDENTIFICADO</field>
+        </record>
+        <record id="cfdi_metodo_pago_2" model="cfdi.metodo.pago">
+            <field name="name">EFECTIVO</field>
+        </record>
+        <record id="cfdi_metodo_pago_3" model="cfdi.metodo.pago">
+            <field name="name">TRANSFERENCIA</field>
+        </record>
+        <record id="cfdi_metodo_pago_4" model="cfdi.metodo.pago">
+            <field name="name">CHEQUE</field>
+        </record>
+        <record id="cfdi_metodo_pago_4" model="cfdi.metodo.pago">
+            <field name="name">TARJETA</field>
+        </record>
+
+        <record id="cfdi_forma_pago_1" model="cfdi.forma.pago">
+            <field name="name">UNA SOLA EXHIBICIÓN</field>
+        </record>
+        
+        <record id="cfdi_tipo_comprobante_1" model="cfdi.tipo.comprobante">
+            <field name="name">FACTURA</field>
+        </record>
+        <record id="cfdi_tipo_comprobante_2" model="cfdi.tipo.comprobante">
+            <field name="name">RECIBO DE HONORARIOS</field>
+        </record>
+        
+        <record id="cfdi_regimen_fiscal_1" model="cfdi.regimen.fiscal">
+            <field name="name">REGIMEN DE LAS PERSONAS FISICAS CON ACTIVIDAD EMPRESARIAL</field>
+        </record>
+        <record id="cfdi_regimen_fiscal_2" model="cfdi.regimen.fiscal">
+            <field name="name">REGIMEN DE INCORPORACION FISCAL</field>
+        </record>
+        <record id="cfdi_regimen_fiscal_3" model="cfdi.regimen.fiscal">
+            <field name="name">REGIMEN GENERAL DE LEY PERSONAS MORALES</field>
+        </record>
+        <record id="cfdi_regimen_fiscal_4" model="cfdi.regimen.fiscal">
+            <field name="name">REGIMEN DE ACTIVIDAD EMPRESARIAL Y PROFESIONAL</field>
+        </record>
+        
+    </data>
+</openerp>

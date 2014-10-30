@@ -27,6 +27,8 @@
 ##############################################################################
 
 from osv import osv, fields
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 import time
 import release
 import tempfile
@@ -67,6 +69,27 @@ class cfdi_regimen_fiscal(osv.osv):
     }
 cfdi_regimen_fiscal()
 
+class cfdi_compras(osv.osv):
+
+    _name = "cfdi.compras"
+    _columns = {
+        'name': fields.char("Vendedor", size=100, required=True),
+        'fecha': fields.date("Fecha", readonly=True),
+        'timbres': fields.integer("Timbres comprados", required=True),
+        'total': fields.float("Total de Venta", digits=(6,2), required=True, help="Cantidad total pagada por el cliente"),
+        'state': fields.selection((
+            ('borrador', 'Borrador'),
+            ('valido', 'Validado')
+        ), "Estado"),
+    }
+    
+    _defaults = {
+        'timbres': 50,
+        'state': "borrador",
+    }
+    
+cfdi_compras()
+
 class cfdi_rnet(osv.osv):
     _name = "cfdi.rnet"
     _columns = {
@@ -89,13 +112,35 @@ class cfdi_rnet(osv.osv):
         'wsdl': fields.char('WSDL', size=200),
         #'timbrar': fields.function(),
         #'cancelar': fields.function(),
+        #CONTROL DE TIMBRES
+        'timbres_comprados': fields.integer("Total Timbres comprados", readonly=True),
+        'timbres_usados': fields.integer("Total de Timbres usados", readonly=True),
+        'compras': fields.many2many('cfdi.compras', 'cfdi_rnet_compras_rel', 'cfdi_rnet_id', 'cfdi_compras_id', "Compras"),
+        'aviso': fields.text("Mensaje de timbres agotados"),
     }
 
-    defaults = {
-        'fecha_inicio': lambda *a: time.strftime('%Y-%m-%d'),
+    _defaults = {
+        'aviso': 'El número de timbres que usted compró ya se agotaron, por favor contactenos a:\n  atencion@rnet.mx \n\nO a los telefonos:\n  (443) 3-40-0599\n  (443) 2-09-0726',
     }
     
-    
+    def calcular_timbres(self, cr, uid, ids, context=None):
+        datos = self.browse(cr, uid, ids, context=context)[0]
+        timbres = 0;
+        for a in datos.compras:
+            timbres = timbres + a.timbres
+            vals = {'state': 'valido'}
+            if not a.fecha:
+                vals.update({'fecha': datetime.today()})
+            a.write(vals)
+        vals = {'timbres_comprados': timbres }
+        return self.write(cr, uid, ids, vals, context=None)
+        
+    def calcular_usados(self, cr, uid, ids, context=None):
+        datos = self.pool.get('account.invoice').search(cr,uid,[('state','=','timbrada')])
+        datos2 = self.pool.get('account.invoice').search(cr, uid,[('state','=','paid')])
+        timbres = len(datos)+len(datos2);
+        vals = {'timbres_usados': timbres }
+        return self.write(cr, uid, ids, vals, context=None)
     
     def get_certificate_info(self, cr, uid, ids, context=None):
         certificate = self.browse(cr, uid, ids, context=context)[0]
