@@ -1,19 +1,23 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
-        
         <record model="ir.ui.view" id="cfdi_invoice_form">
             <field name="name">cfdi.invoice.form</field>
             <field name="model">account.invoice</field>
             <field name="inherit_id" ref="account.invoice_form"/>
             <field name="type">form</field>
             <field name="arch" type="xml">
+                <field name="name" position="after">
+                    <field name="tipoComprobante" attrs="{'readonly':[('state','!=','draft')]}" groups="base.group_extended"/>
+                    <button name="check_timbres" string="Timbres Disponibles" type="object" groups="base.group_extended"/>
+                </field>
                 <field name="name" position="before">
                     <newline/>
-                    <group colspan="4" col="6">
+                    <group colspan="4" col="8">
                         <field name="cfdi_forma_pago" widget="selection" required="1" attrs="{'readonly':[('state','!=','draft')]}"/>
                         <field name="cfdi_metodo_pago" widget="selection" required="1" attrs="{'readonly':[('state','!=','draft')]}"/>
                         <field name="cfdi_cuatro_digitos" attrs="{'readonly':[('state','!=','draft')]}"/>
+                        <button name="soporte_tecnico" string="Soporte Técnico" type="object" icon="STOCK_HELP"/>
                         <field name="id_cfdi_rnet" required="1" invisible="True"/>
                         <field name="cbb" widget="image" invisible="True"/>
                         <field name="cfdi_regimen_fiscal" invisible="True"/>
@@ -22,12 +26,13 @@
                 </field>
                 <button name="invoice_open" position="after">
                     <button name="timbrar" string="Timbrar" states="open" type="object" icon="gtk-apply"/>
+                    <button name="cancelar" string="Cancelar SAT" states="timbrada" type="object" icon="gtk-cancel"/>
                 </button>
                 <button name="%(account.account_invoices)d" position="replace">
                     <button name="%(account.account_invoices)d" string="Imprimir Factura" type="action" icon="gtk-print" states="open,timbrada,paid,proforma,sale,proforma2"/>
                 </button>
                 <field name="state" position="replace">
-                    <field name="state" widget="statusbar" statusbar_visible="draft,open,timbrada,paid" statusbar_colors="{&quot;proforma&quot;:&quot;blue&quot;,&quot;proforma2&quot;:&quot;blue&quot;}"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,open,timbrada,paid" statusbar_colors="{&quot;proforma&quot;:&quot;blue&quot;,&quot;proforma2&quot;:&quot;blue&quot;,&quot;cancelada&quot;:&quot;red&quot;}"/>
                 </field>
             </field>
         </record>
@@ -43,6 +48,25 @@
            </button>
            </field>
         </record>
+        
+        <!-- VISTA PARA FACTURAS DE PROVEDOR CON VALIDACION ANTE SAT-->
+        <record id="cfdi_view_invoice_customer" model="ir.ui.view">
+            <field name="name">cfdi.view.invoice.customer</field>
+            <field name="model">account.invoice</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="account.invoice_supplier_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="/form/group" position="after">
+                    <group col="8" colspan="4">
+                        <field name="fechaValidacion"/>
+                        <field name="estatus"/>
+                        <field name="codigoEstatus" widget="char"/>
+                        <button name="obtener_validacion" type="object" string="Validar XML" icon="gtk-go-forward"/>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+        
         <menuitem name="Facturas Enviadas"
             id="cfdi_menu_email_message"
             parent="account.menu_finance_receivables"

@@ -27,7 +27,7 @@
 ##############################################################################
 {
     "name" : "Creacion de Factura Electronica para Mexico (CFDi)",
-    "version" : "1.3",
+    "version" : "1.4",
     "author" : "rNet Soluciones",
     "category" : "Accounting & Finance",
     "depends": ["sale", "account", "account_voucher", "base_vat_mx","l10n_mx_invoice_amount_to_text","l10n_mx_partner_address","partner_bank_last_digits"],
@@ -50,7 +50,7 @@
                     "security/event_security.xml",
                     "security/ir.model.access.csv",
                     "required/l10n_mx_facturae_lib/security/ir.model.access.csv",
-                    #"cfdi_data.xml"
+                    "cfdi_data.xml"
                     ],
     "installable" : True,
     'auto_install': False,
