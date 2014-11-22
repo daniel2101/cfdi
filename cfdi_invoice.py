@@ -54,18 +54,11 @@ class cfdi_account_invoice(osv.osv):
         timbres_u = inv.id_cfdi_rnet.timbres_usados
         aviso = "El Número de timbres comprados es: %s\nEl Número de timbres usados es: %s\nUsted tiene: %s timbres disponibles.\n" % (timbres_c, timbres_u, timbres_c - timbres_u)
         raise osv.except_osv("Aviso!", aviso)
-<<<<<<< HEAD
         
     def soporte_tecnico(self, cr, uid, ids, partner_id, context={}):
         invoice = self.browse(cr,uid,ids)
         inv = invoice[0]
-<<<<<<< HEAD
         raise osv.except_osv("Contacto!", "Si tiene algún problema con el sistema por favor contactenos al correo: atencion@rnet.mx\nTelefonos: 01800 015 7477 | (443) 209 0726 y 340 0599\nVisite nuestra página: www.rnet.mx")
-=======
-        raise osv.except_osv("Contacto!", "Si tiene algún problema con el sistema por favor contactenos al correo: atencio@rnet.mx\nTelefonos: 01800 015 7477 | (443) 209 0726 y 340 0599\nVisite nuestra página: www.rnet.mx")
-=======
->>>>>>> origin/master
->>>>>>> parent of eca01e2... Versión 1.4
 
     def timbrar(self, cr, uid, ids, partner_id, context={}):
         global ERROR
@@ -81,11 +74,7 @@ class cfdi_account_invoice(osv.osv):
             raise osv.except_osv("AVISO","No se encuentran configurados los datos del PAC, no es posible timbrar!")
         xml = self.genera_xml(cr,uid,ids,partner_id)
         xml = xml.toxml(encoding='utf-8')
-<<<<<<< HEAD
         a = SOAPProxy("https://generacfdi.com.mx/rvltimbrado/service1.asmx")
-=======
-        a = SOAPProxy("https://ws2.bovedacomprobante.net/ws/service.asmx")
->>>>>>> origin/master
         if ERROR not in ("", "--"):
             error = ERROR
             ERROR = "--"
@@ -218,30 +207,17 @@ class cfdi_account_invoice(osv.osv):
         pw = invoice.id_cfdi_rnet.pac_password
         if not user or not pw:
             raise osv.except_osv("AVISO","No se encuentran configurados los datos del PAC, no es posible cancelar!")
-<<<<<<< HEAD
         a = SOAPProxy("https://generacfdi.com.mx/rvltimbrado/service1.asmx")
         env = '<soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Header><AuthSoapHd xmlns="http://tempuri.org/"><strUserName>'+user+'</strUserName><strPassword>'+pw+'</strPassword></AuthSoapHd></soap:Header><soap:Body><CancelTicket xmlns="http://tempuri.org/"><base64Cfd>'+B64.encodestring(xml_final)+'</base64Cfd></CancelTicket></soap:Body></soap:Envelope>'
         ns = None
         sa = "http://tempuri.org/CancelTicket" #soap action
-=======
-        a = SOAPProxy("https://ws2.bovedacomprobante.net/ws/service.asmx")
-        env = '<?xml version="1.0" encoding="utf-8"?><soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Header><AuthSoapHd xmlns="http://tempuri.org/"><strUserName>'+user+'</strUserName><strPassword>'+pw+'</strPassword></AuthSoapHd></soap:Header><soap:Body><CancelTicketExtended xmlns="http://tempuri.org/"><base64Cfd>'+B64.encodestring(xml_final)+'</base64Cfd></CancelTicketExtended></soap:Body></soap:Envelope>'
-        ns = None
-        sa = "http://tempuri.org/CancelTicketExtended" #soap action
->>>>>>> origin/master
         r, a.namespace = a.transport.call(a.proxy, env, ns, sa, encoding = 'utf-8', http_proxy = a.http_proxy, config = a.config)
         xml_respuesta = minidom.parseString(r)
         # 9.- Validar la respuesta del PAC
         estado = xml_respuesta.getElementsByTagName("state")[0].firstChild.data
-<<<<<<< HEAD
         if estado not in ("201", "202"):
             descripcion = xml_respuesta.getElementsByTagName("Descripcion")[0].firstChild.data
             raise osv.except_osv("Aviso", "Estado: %s\nDescripción: %s\n" % (estado, descripcion))
-=======
-        descripcion = xml_respuesta.getElementsByTagName("Descripcion")[0].firstChild.data
-        if estado not in ("201"):
-            raise osv.except_osv("Aviso", descripcion)
->>>>>>> origin/master
         # 10.- Cambiar estado a cancelado y escribir xml de cancelacion
         data_attach = {
                     'name': 'Cancelada_'+invoice.number+'.xml',
@@ -631,7 +607,6 @@ class cfdi_account_invoice(osv.osv):
         if len(mp)>0:
             return mp[0]
         return False
-<<<<<<< HEAD
         
     #Funcion para obtener valores del XML
     
@@ -687,8 +662,6 @@ class cfdi_account_invoice(osv.osv):
             'reference': folio,
         }
         return self.write(cr, uid, [id], vals, context)
-=======
->>>>>>> origin/master
              
     _inherit = 'account.invoice'
     _columns = {
@@ -731,13 +704,10 @@ class cfdi_account_invoice(osv.osv):
         'cbb': fields.binary("Codigo de Barras"),
         #Fecha de Cancelacion
         'fechaCancelacion': fields.char("Fecha de Cancelacion", size=30),
-<<<<<<< HEAD
         #Validar Archivos XML y Facturas ante el SAT, para Compras
         'fechaValidacion': fields.datetime("Fecha de Validación", readonly=True),
         'estatus': fields.char("Estatus de Factura", size=100, readonly=True),
         'codigoEstatus': fields.text("Codigo de Estatus", readonly=True),
-=======
->>>>>>> origin/master
     }
     
     _defaults = {
