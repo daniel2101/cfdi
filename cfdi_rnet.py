@@ -138,7 +138,8 @@ class cfdi_rnet(osv.osv):
     def calcular_usados(self, cr, uid, ids, context=None):
         datos = self.pool.get('account.invoice').search(cr,uid,[('state','=','timbrada')])
         datos2 = self.pool.get('account.invoice').search(cr, uid,[('state','=','paid')])
-        timbres = len(datos)+len(datos2);
+        datos3 = self.pool.get('account.invoice').search(cr, uid,[('state','=','cancelada')])
+        timbres = len(datos)+len(datos2)+(len(datos3)*2)
         vals = {'timbres_usados': timbres }
         return self.write(cr, uid, ids, vals, context=None)
     

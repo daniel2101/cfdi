@@ -58,7 +58,7 @@ class cfdi_account_invoice(osv.osv):
     def soporte_tecnico(self, cr, uid, ids, partner_id, context={}):
         invoice = self.browse(cr,uid,ids)
         inv = invoice[0]
-        raise osv.except_osv("Contacto!", "Si tiene algún problema con el sistema por favor contactenos al correo: atencio@rnet.mx\nTelefonos: 01800 015 7477 | (443) 209 0726 y 340 0599\nVisite nuestra página: www.rnet.mx")
+        raise osv.except_osv("Contacto!", "Si tiene algún problema con el sistema por favor contactenos al correo: atencion@rnet.mx\nTelefonos: 01800 015 7477 | (443) 209 0726 y 340 0599\nVisite nuestra página: www.rnet.mx")
 
     def timbrar(self, cr, uid, ids, partner_id, context={}):
         global ERROR
@@ -241,6 +241,10 @@ class cfdi_account_invoice(osv.osv):
             'fechaCancelacion': xml_respuesta.getElementsByTagName("Fecha")[0].firstChild.data,
             'state': 'cancelada',
         }
+        vals = {
+                'timbres_usados': invoice.id_cfdi_rnet.timbres_usados +1,
+        }
+        invoice.id_cfdi_rnet.write(vals)
         return self.write(cr, uid, ids, data, context)
         
     def cambiar_caracteres(self, string):

@@ -26,13 +26,13 @@
 #
 ##############################################################################
 {
-    "name" : "Creacion de Factura Electronica para Mexico (CFDi)",
-    "version" : "1.4",
+    "name" : "Creacion de Factura Electrónica para Mexico (CFDi)",
+    "version" : "1.4.1",
     "author" : "rNet Soluciones",
     "category" : "Accounting & Finance",
     "depends": ["sale", "account", "account_voucher", "base_vat_mx","l10n_mx_invoice_amount_to_text","l10n_mx_partner_address","partner_bank_last_digits"],
     "website": "http://rnet.mx",
-    "description" : """FACTURACIÓN ELÉCTRONICA CFDi, SEGÚN LA LEGISLACIÓN MEXICANA 2013.
+    "description" : """FACTURACIÓN ELECTRÓNICA CFDi, SEGÚN LA LEGISLACIÓN MEXICANA 2013.
   
   Pogramas requeridos:
   xsltproc
