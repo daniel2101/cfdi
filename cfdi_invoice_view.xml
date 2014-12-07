@@ -31,6 +31,7 @@
                 <button name="%(account.account_invoices)d" position="replace">
                     <button name="%(account.account_invoices)d" string="Imprimir Factura" type="action" icon="gtk-print" states="open,timbrada,paid,proforma,sale,proforma2"/>
                 </button>
+                <button name="%(account.action_account_invoice_refund)d" position="replace"/>
                 <field name="state" position="replace">
                     <field name="state" widget="statusbar" statusbar_visible="draft,open,timbrada,paid" statusbar_colors="{&quot;proforma&quot;:&quot;blue&quot;,&quot;proforma2&quot;:&quot;blue&quot;,&quot;cancelada&quot;:&quot;red&quot;}"/>
                 </field>

@@ -162,6 +162,7 @@ class cfdi_account_invoice(osv.osv):
         return data
     
     def cancelar(self, cr, uid, ids, partner_id):
+        #raise osv.except_osv("Aviso", "En corrección, disponible a partir del 27 de Noviembre.")
         invoice = self.browse(cr,uid,ids)[0]
         # 1.- XML DE CANCELACION
         mexico = timezone('America/Mexico_City')
@@ -200,7 +201,7 @@ class cfdi_account_invoice(osv.osv):
         # 7.- Crear XML Final
         signature = '<Signature xmlns="http://www.w3.org/2000/09/xmldsig#">'+xml_signedInfo+'<SignatureValue>'+firma+'</SignatureValue>'
         keyInfo = '<KeyInfo><X509Data><X509IssuerSerial><X509IssuerName>'+name+'</X509IssuerName><X509SerialNumber>'+serial+'</X509SerialNumber></X509IssuerSerial><X509Certificate>'+B64.decodestring(certificado).replace("-----BEGIN CERTIFICATE-----","").replace("-----END CERTIFICATE-----","")+'</X509Certificate></X509Data></KeyInfo></Signature>'
-        xml_final = '<?xml version="1.0" encoding="UTF-8"?>'+xml_cancelacion.replace("</Cancelacion>", "")+signature+keyInfo+"</Cancelacion>"
+        xml_final = xml_cancelacion.replace("</Cancelacion>", "")+signature+keyInfo+"</Cancelacion>"
         xml_final = self.cambiar_caracteres(xml_final.replace("\n",""))
         # 8.- Solicitar cancelacion al PAC
         user = invoice.id_cfdi_rnet.pac_usuario
@@ -213,11 +214,11 @@ class cfdi_account_invoice(osv.osv):
         sa = "http://tempuri.org/CancelTicket" #soap action
         r, a.namespace = a.transport.call(a.proxy, env, ns, sa, encoding = 'utf-8', http_proxy = a.http_proxy, config = a.config)
         xml_respuesta = minidom.parseString(r)
-        # 9.- Validar la respuesta del PAC
+        #9.- Validar la respuesta del PAC
         estado = xml_respuesta.getElementsByTagName("state")[0].firstChild.data
-        if estado not in ("201", "202"):
+        if estado not in ("0"):
             descripcion = xml_respuesta.getElementsByTagName("Descripcion")[0].firstChild.data
-            raise osv.except_osv("Aviso", "Estado: %s\nDescripción: %s\n" % (estado, descripcion))
+            raise osv.except_osv("Aviso", "Estado: %s\nDescripción: %s\n" % (estado.encode('utf-8'), descripcion.encode('utf-8')))
         # 10.- Cambiar estado a cancelado y escribir xml de cancelacion
         data_attach = {
                     'name': 'Cancelada_'+invoice.number+'.xml',
@@ -227,7 +228,7 @@ class cfdi_account_invoice(osv.osv):
                     'res_model': self._name,
                     'res_id': invoice.id,
         }
-        self.pool.get('ir.attachment').create(cr, uid, data_attach, context=context)
+        self.pool.get('ir.attachment').create(cr, uid, data_attach)
         data_attach = {
                     'name': 'Cancelada_PAC_'+invoice.number+'.xml',
                     'datas': B64.encodestring(r),
@@ -236,7 +237,7 @@ class cfdi_account_invoice(osv.osv):
                     'res_model': self._name,
                     'res_id': invoice.id,
         }
-        self.pool.get('ir.attachment').create(cr, uid, data_attach, context=context)
+        self.pool.get('ir.attachment').create(cr, uid, data_attach)
         data = {
             'fechaCancelacion': xml_respuesta.getElementsByTagName("Fecha")[0].firstChild.data,
             'state': 'cancelada',
@@ -245,7 +246,7 @@ class cfdi_account_invoice(osv.osv):
                 'timbres_usados': invoice.id_cfdi_rnet.timbres_usados +1,
         }
         invoice.id_cfdi_rnet.write(vals)
-        return self.write(cr, uid, ids, data, context)
+        return self.write(cr, uid, ids, data)
         
     def cambiar_caracteres(self, string):
         string = string.encode('utf8')
